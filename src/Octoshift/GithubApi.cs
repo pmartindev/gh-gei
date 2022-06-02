@@ -611,7 +611,7 @@ namespace OctoshiftCLI
             };
         }
 
-        public virtual async Task ArchiveRepository(string sourceOrg, string sourceRepo)
+        public virtual async Task<(bool successful, string message)> ArchiveRepository(string sourceOrg, string sourceRepo)
         {
             var repositoryId = await GetRepositoryId(sourceOrg, sourceRepo);
 
@@ -632,6 +632,17 @@ namespace OctoshiftCLI
 
             var response = await _client.PostAsync(url, payload);
             var data = JObject.Parse(response);
+
+            var successful = true;
+            var message = string.Empty;
+
+            if (data.ContainsKey("errors") && data["errors"]!.HasValues)
+            {
+                successful = false;
+                message = data["errors"][0]!["message"]!.ToString();
+            }
+
+            return (successful, message);
         }
     }
 }

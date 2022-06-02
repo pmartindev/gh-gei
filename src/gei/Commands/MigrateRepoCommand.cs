@@ -217,7 +217,13 @@ namespace OctoshiftCLI.GithubEnterpriseImporter.Commands
             {
                 _log.LogInformation($"Locking source repo '{sourceRepoUrl}'...");
                 var sourceGitHubApi = _sourceGithubApiFactory.Create(sourcePersonalAccessToken: args.GithubSourcePat);
-                await sourceGitHubApi.ArchiveRepository(args.GithubSourceOrg, args.SourceRepo);
+                var (successful, message) = await sourceGitHubApi.ArchiveRepository(args.GithubSourceOrg, args.SourceRepo);
+
+                if (!successful)
+                {
+                    _log.LogError($"Unable to put the {args.SourceRepo} into an archive state. Reason: {message}");
+                    return;
+                }
             }
 
             var migrationId = await githubApi.StartMigration(
