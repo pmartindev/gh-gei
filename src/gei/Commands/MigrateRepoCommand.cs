@@ -135,10 +135,10 @@ namespace OctoshiftCLI.GithubEnterpriseImporter.Commands
                 IsRequired = false
             };
 
-            var lockRepo = new Option("--lock-repo")
+            var archiveGhRepo = new Option("--archive-gh-repo")
             {
                 IsRequired = false,
-                Description = "Only effective if migrating from GHES or GitHub Cloud. This will lock the source repository to prevent changes while the migration is taking place. Note that for GitHub Cloud, this will put the repo in an 'Archive' state to prevent activity against it."
+                Description = "Only effective if migrating from GitHub Cloud. This will place the source repository into an archive state to prevent changes while the migration is taking place."
             };
 
             AddOption(githubSourceOrg);
@@ -166,7 +166,7 @@ namespace OctoshiftCLI.GithubEnterpriseImporter.Commands
             AddOption(adoPat);
             AddOption(verbose);
 
-            AddOption(lockRepo);
+            AddOption(archiveGhRepo);
 
             Handler = CommandHandler.Create<MigrateRepoCommandArgs>(Invoke);
         }
@@ -190,7 +190,7 @@ namespace OctoshiftCLI.GithubEnterpriseImporter.Commands
                   args.SourceRepo,
                   args.AzureStorageConnectionString,
                   args.GithubSourcePat,
-                  args.LockRepo,
+                  args.ArchiveGhRepo,
                   args.NoSslVerify
                 );
 
@@ -213,10 +213,11 @@ namespace OctoshiftCLI.GithubEnterpriseImporter.Commands
                 ? await githubApi.CreateGhecMigrationSource(githubOrgId)
                 : await githubApi.CreateAdoMigrationSource(githubOrgId, args.AdoServerUrl);
 
-            if (!args.GhesApiUrl.HasValue() && args.GithubSourceOrg.HasValue() && args.LockRepo)
+            if (!args.GhesApiUrl.HasValue() && args.GithubSourceOrg.HasValue() && args.ArchiveGhRepo)
             {
                 _log.LogInformation($"Locking source repo '{sourceRepoUrl}'...");
-                await githubApi.LockSourceRepoViaSettingArchiveState(args.GithubSourceOrg, args.SourceRepo);
+                var sourceGitHubApi = _sourceGithubApiFactory.Create(sourcePersonalAccessToken: args.GithubSourcePat);
+                await sourceGitHubApi.ArchiveRepository(args.GithubSourceOrg, args.SourceRepo);
             }
 
             var migrationId = await githubApi.StartMigration(
@@ -494,6 +495,6 @@ namespace OctoshiftCLI.GithubEnterpriseImporter.Commands
         public string GithubSourcePat { get; set; }
         public string GithubTargetPat { get; set; }
         public string AdoPat { get; set; }
-        public bool LockRepo { get; set; }
+        public bool ArchiveGhRepo { get; set; }
     }
 }

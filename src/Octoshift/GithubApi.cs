@@ -611,21 +611,21 @@ namespace OctoshiftCLI
             };
         }
 
-        public virtual async Task LockSourceRepoViaSettingArchiveState(string sourceOrg, string sourceRepo)
+        public virtual async Task ArchiveRepository(string sourceOrg, string sourceRepo)
         {
-            var repoId = await GetRepositoryId(sourceOrg, sourceRepo);
+            var repositoryId = await GetRepositoryId(sourceOrg, sourceRepo);
 
             var url = $"{_apiUrl}/graphql";
 
-            var query = "mutation archiveRepository($repositoryId: ID!)";
-            var gql = "archiveRepository(input: {repositoryId: $repoId}) { clientMutationId } }";
+            var query = "mutation archiveRepository($repoId: ID!)";
+            var gql = "archiveRepository(input: {repositoryId: $repoId}) { clientMutationId }";
 
             var payload = new
             {
                 query = $"{query} {{ {gql} }}",
                 variables = new
                 {
-                    repositoryId = repoId
+                    repoId = repositoryId
                 },
                 operationName = "archiveRepository"
             };
