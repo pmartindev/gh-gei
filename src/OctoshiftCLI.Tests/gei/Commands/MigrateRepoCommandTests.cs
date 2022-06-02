@@ -50,7 +50,7 @@ namespace OctoshiftCLI.Tests.GithubEnterpriseImporter.Commands
             TestHelpers.VerifyCommandOption(command.Options, "github-target-pat", false);
             TestHelpers.VerifyCommandOption(command.Options, "ado-pat", false);
             TestHelpers.VerifyCommandOption(command.Options, "verbose", false);
-            TestHelpers.VerifyCommandOption(command.Options, "lock-repo", false);
+            TestHelpers.VerifyCommandOption(command.Options, "archive-gh-repo", false);
         }
 
         [Fact]
