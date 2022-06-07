@@ -45,32 +45,30 @@ namespace OctoshiftCLI.Tests.GithubEnterpriseImporter.Commands
         [Fact]
         public void Should_Have_Options()
         {
-            var command = new MigrateRepoCommand(null, null, null, null, null);
-            command.Should().NotBeNull();
-            command.Name.Should().Be("migrate-repo");
-            command.Options.Count.Should().Be(21);
+            _command.Should().NotBeNull();
+            _command.Name.Should().Be("migrate-repo");
+            _command.Options.Count.Should().Be(20);
 
-            TestHelpers.VerifyCommandOption(command.Options, "github-source-org", false);
-            TestHelpers.VerifyCommandOption(command.Options, "ado-server-url", false, true);
-            TestHelpers.VerifyCommandOption(command.Options, "ado-source-org", false);
-            TestHelpers.VerifyCommandOption(command.Options, "ado-team-project", false);
-            TestHelpers.VerifyCommandOption(command.Options, "source-repo", true);
-            TestHelpers.VerifyCommandOption(command.Options, "github-target-org", true);
-            TestHelpers.VerifyCommandOption(command.Options, "target-repo", false);
-            TestHelpers.VerifyCommandOption(command.Options, "target-api-url", false);
-            TestHelpers.VerifyCommandOption(command.Options, "ghes-api-url", false);
-            TestHelpers.VerifyCommandOption(command.Options, "azure-storage-connection-string", false);
-            TestHelpers.VerifyCommandOption(command.Options, "no-ssl-verify", false);
-            TestHelpers.VerifyCommandOption(command.Options, "skip-releases", false, true);
-            TestHelpers.VerifyCommandOption(command.Options, "git-archive-url", false, true);
-            TestHelpers.VerifyCommandOption(command.Options, "metadata-archive-url", false, true);
-            TestHelpers.VerifyCommandOption(command.Options, "ssh", false, true);
-            TestHelpers.VerifyCommandOption(command.Options, "wait", false);
-            TestHelpers.VerifyCommandOption(command.Options, "github-source-pat", false);
-            TestHelpers.VerifyCommandOption(command.Options, "github-target-pat", false);
-            TestHelpers.VerifyCommandOption(command.Options, "ado-pat", false);
-            TestHelpers.VerifyCommandOption(command.Options, "verbose", false);
-            TestHelpers.VerifyCommandOption(command.Options, "archive-gh-repo", false);
+            TestHelpers.VerifyCommandOption(_command.Options, "github-source-org", false);
+            TestHelpers.VerifyCommandOption(_command.Options, "ado-server-url", false, true);
+            TestHelpers.VerifyCommandOption(_command.Options, "ado-source-org", false);
+            TestHelpers.VerifyCommandOption(_command.Options, "ado-team-project", false);
+            TestHelpers.VerifyCommandOption(_command.Options, "source-repo", true);
+            TestHelpers.VerifyCommandOption(_command.Options, "github-target-org", true);
+            TestHelpers.VerifyCommandOption(_command.Options, "target-repo", false);
+            TestHelpers.VerifyCommandOption(_command.Options, "target-api-url", false);
+            TestHelpers.VerifyCommandOption(_command.Options, "ghes-api-url", false);
+            TestHelpers.VerifyCommandOption(_command.Options, "azure-storage-connection-string", false);
+            TestHelpers.VerifyCommandOption(_command.Options, "no-ssl-verify", false);
+            TestHelpers.VerifyCommandOption(_command.Options, "skip-releases", false, true);
+            TestHelpers.VerifyCommandOption(_command.Options, "git-archive-url", false, true);
+            TestHelpers.VerifyCommandOption(_command.Options, "metadata-archive-url", false, true);
+            TestHelpers.VerifyCommandOption(_command.Options, "ssh", false, true);
+            TestHelpers.VerifyCommandOption(_command.Options, "wait", false);
+            TestHelpers.VerifyCommandOption(_command.Options, "github-source-pat", false);
+            TestHelpers.VerifyCommandOption(_command.Options, "github-target-pat", false);
+            TestHelpers.VerifyCommandOption(_command.Options, "ado-pat", false);
+            TestHelpers.VerifyCommandOption(_command.Options, "verbose", false);
         }
 
         [Fact]
@@ -357,14 +355,12 @@ namespace OctoshiftCLI.Tests.GithubEnterpriseImporter.Commands
                 .Returns(migrationId);
             _mockGithubApi.Setup(x => x.GetMigrationState(migrationId).Result).Returns("SUCCEEDED");
 
-            var mockGhesGithubApi = TestHelpers.CreateMock<GithubApi>();
-            
-            mockGhesGithubApi.Setup(x => x.StartGitArchiveGeneration(SOURCE_ORG, SOURCE_REPO, false).Result).Returns(gitArchiveId);
-            mockGhesGithubApi.Setup(x => x.StartMetadataArchiveGeneration(SOURCE_ORG, SOURCE_REPO, false).Result).Returns(metadataArchiveId);
-            mockGhesGithubApi.Setup(x => x.GetArchiveMigrationStatus(SOURCE_ORG, gitArchiveId).Result).Returns(ArchiveMigrationStatus.Exported);
-            mockGhesGithubApi.Setup(x => x.GetArchiveMigrationStatus(SOURCE_ORG, metadataArchiveId).Result).Returns(ArchiveMigrationStatus.Exported);
-            mockGhesGithubApi.Setup(x => x.GetArchiveMigrationUrl(SOURCE_ORG, gitArchiveId).Result).Returns(gitArchiveUrl);
-            mockGhesGithubApi.Setup(x => x.GetArchiveMigrationUrl(SOURCE_ORG, metadataArchiveId).Result).Returns(metadataArchiveUrl);
+            _mockGithubApi.Setup(x => x.StartGitArchiveGeneration(SOURCE_ORG, SOURCE_REPO).Result).Returns(gitArchiveId);
+            _mockGithubApi.Setup(x => x.StartMetadataArchiveGeneration(SOURCE_ORG, SOURCE_REPO).Result).Returns(metadataArchiveId);
+            _mockGithubApi.Setup(x => x.GetArchiveMigrationStatus(SOURCE_ORG, gitArchiveId).Result).Returns(ArchiveMigrationStatus.Exported);
+            _mockGithubApi.Setup(x => x.GetArchiveMigrationStatus(SOURCE_ORG, metadataArchiveId).Result).Returns(ArchiveMigrationStatus.Exported);
+            _mockGithubApi.Setup(x => x.GetArchiveMigrationUrl(SOURCE_ORG, gitArchiveId).Result).Returns(gitArchiveUrl);
+            _mockGithubApi.Setup(x => x.GetArchiveMigrationUrl(SOURCE_ORG, metadataArchiveId).Result).Returns(metadataArchiveUrl);
 
             _mockAzureApi.Setup(x => x.DownloadArchive(gitArchiveUrl).Result).Returns(gitArchiveContent);
             _mockAzureApi.Setup(x => x.DownloadArchive(metadataArchiveUrl).Result).Returns(metadataArchiveContent);
@@ -605,16 +601,7 @@ namespace OctoshiftCLI.Tests.GithubEnterpriseImporter.Commands
                     authenticatedMetadataArchiveUrl.ToString(),
                     false).Result)
                 .Returns(migrationId);
-
-            mockGithub.Setup(x => x.GetMigrationState(migrationId).Result).Returns("SUCCEEDED");
-
-            var mockGhesGithubApi = TestHelpers.CreateMock<GithubApi>();
-            mockGhesGithubApi.Setup(x => x.StartGitArchiveGeneration(SOURCE_ORG, SOURCE_REPO, false).Result).Returns(gitArchiveId);
-            mockGhesGithubApi.Setup(x => x.StartMetadataArchiveGeneration(SOURCE_ORG, SOURCE_REPO, false).Result).Returns(metadataArchiveId);
-            mockGhesGithubApi.Setup(x => x.GetArchiveMigrationStatus(SOURCE_ORG, gitArchiveId).Result).Returns(ArchiveMigrationStatus.Exported);
-            mockGhesGithubApi.Setup(x => x.GetArchiveMigrationStatus(SOURCE_ORG, metadataArchiveId).Result).Returns(ArchiveMigrationStatus.Exported);
-            mockGhesGithubApi.Setup(x => x.GetArchiveMigrationUrl(SOURCE_ORG, gitArchiveId).Result).Returns(gitArchiveUrl);
-            mockGhesGithubApi.Setup(x => x.GetArchiveMigrationUrl(SOURCE_ORG, metadataArchiveId).Result).Returns(metadataArchiveUrl);
+            _mockGithubApi.Setup(x => x.GetMigrationState(migrationId).Result).Returns("SUCCEEDED");
 
             _mockGithubApi.Setup(x => x.StartGitArchiveGeneration(SOURCE_ORG, SOURCE_REPO).Result).Returns(gitArchiveId);
             _mockGithubApi.Setup(x => x.StartMetadataArchiveGeneration(SOURCE_ORG, SOURCE_REPO).Result).Returns(metadataArchiveId);
@@ -686,16 +673,7 @@ namespace OctoshiftCLI.Tests.GithubEnterpriseImporter.Commands
                     authenticatedMetadataArchiveUrl.ToString(),
                     false).Result)
                 .Returns(migrationId);
-
-            mockGithub.Setup(x => x.GetMigrationState(migrationId).Result).Returns("SUCCEEDED");
-
-            var mockGhesGithubApi = TestHelpers.CreateMock<GithubApi>();
-            mockGhesGithubApi.Setup(x => x.StartGitArchiveGeneration(SOURCE_ORG, SOURCE_REPO, false).Result).Returns(gitArchiveId);
-            mockGhesGithubApi.Setup(x => x.StartMetadataArchiveGeneration(SOURCE_ORG, SOURCE_REPO, false).Result).Returns(metadataArchiveId);
-            mockGhesGithubApi.Setup(x => x.GetArchiveMigrationStatus(SOURCE_ORG, gitArchiveId).Result).Returns(ArchiveMigrationStatus.Exported);
-            mockGhesGithubApi.Setup(x => x.GetArchiveMigrationStatus(SOURCE_ORG, metadataArchiveId).Result).Returns(ArchiveMigrationStatus.Exported);
-            mockGhesGithubApi.Setup(x => x.GetArchiveMigrationUrl(SOURCE_ORG, gitArchiveId).Result).Returns(gitArchiveUrl);
-            mockGhesGithubApi.Setup(x => x.GetArchiveMigrationUrl(SOURCE_ORG, metadataArchiveId).Result).Returns(metadataArchiveUrl);
+            _mockGithubApi.Setup(x => x.GetMigrationState(migrationId).Result).Returns("SUCCEEDED");
 
             _mockGithubApi.Setup(x => x.StartGitArchiveGeneration(SOURCE_ORG, SOURCE_REPO).Result).Returns(gitArchiveId);
             _mockGithubApi.Setup(x => x.StartMetadataArchiveGeneration(SOURCE_ORG, SOURCE_REPO).Result).Returns(metadataArchiveId);
@@ -741,10 +719,9 @@ namespace OctoshiftCLI.Tests.GithubEnterpriseImporter.Commands
             var gitArchiveId = 1;
             var metadataArchiveId = 2;
 
-            var mockGhesGithubApi = TestHelpers.CreateMock<GithubApi>();
-            mockGhesGithubApi.Setup(x => x.StartGitArchiveGeneration(SOURCE_ORG, SOURCE_REPO, false).Result).Returns(gitArchiveId);
-            mockGhesGithubApi.Setup(x => x.StartMetadataArchiveGeneration(SOURCE_ORG, SOURCE_REPO, false).Result).Returns(metadataArchiveId);
-            mockGhesGithubApi.Setup(x => x.GetArchiveMigrationStatus(SOURCE_ORG, gitArchiveId).Result).Returns(ArchiveMigrationStatus.Failed);
+            _mockGithubApi.Setup(x => x.StartGitArchiveGeneration(SOURCE_ORG, SOURCE_REPO).Result).Returns(gitArchiveId);
+            _mockGithubApi.Setup(x => x.StartMetadataArchiveGeneration(SOURCE_ORG, SOURCE_REPO).Result).Returns(metadataArchiveId);
+            _mockGithubApi.Setup(x => x.GetArchiveMigrationStatus(SOURCE_ORG, gitArchiveId).Result).Returns(ArchiveMigrationStatus.Failed);
 
             _mockSourceGithubApiFactory.Setup(m => m.Create(GHES_API_URL, It.IsAny<string>())).Returns(_mockGithubApi.Object);
             _mockAzureApiFactory.Setup(m => m.Create(AZURE_CONNECTION_STRING)).Returns(_mockAzureApi.Object);

@@ -486,14 +486,13 @@ namespace OctoshiftCLI
             await _client.DeleteAsync(url);
         }
 
-        public virtual async Task<int> StartGitArchiveGeneration(string org, string repo, bool lockRepo)
+        public virtual async Task<int> StartGitArchiveGeneration(string org, string repo)
         {
             var url = $"{_apiUrl}/orgs/{org}/migrations";
 
             var options = new
             {
                 repositories = new[] { repo },
-                lock_repositories = lockRepo,
                 exclude_metadata = true
             };
 
@@ -502,14 +501,13 @@ namespace OctoshiftCLI
             return (int)data["id"];
         }
 
-        public virtual async Task<int> StartMetadataArchiveGeneration(string org, string repo, bool lockRepo)
+        public virtual async Task<int> StartMetadataArchiveGeneration(string org, string repo)
         {
             var url = $"{_apiUrl}/orgs/{org}/migrations";
 
             var options = new
             {
                 repositories = new[] { repo },
-                lock_repositories = lockRepo,
                 exclude_git_data = true,
                 exclude_releases = true,
                 exclude_owner_projects = true
