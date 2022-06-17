@@ -597,7 +597,7 @@ steps:
 
             isRepoArchived.Should().BeTrue();
         }
-      
+
         public async Task ResetBlobContainers()
         {
             _output.WriteLine($"Deleting all blob containers...");

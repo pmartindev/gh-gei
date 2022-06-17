@@ -44,7 +44,7 @@ namespace OctoshiftCLI.Tests.GithubEnterpriseImporter.Commands
 
         [Fact]
         public void Should_Have_Options()
-        {          
+        {
             _command.Should().NotBeNull();
             _command.Name.Should().Be("migrate-repo");
             _command.Options.Count.Should().Be(21);
