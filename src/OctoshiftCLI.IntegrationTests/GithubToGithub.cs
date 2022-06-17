@@ -40,8 +40,8 @@ namespace OctoshiftCLI.IntegrationTests
         [Fact]
         public async Task ArchiveSourceGhecRepo()
         {
-            var githubSourceOrg = $"e2e-testing-source-{_helper.GetOsName()}";
-            var githubTargetOrg = $"e2e-testing-{_helper.GetOsName()}";
+            var githubSourceOrg = $"e2e-testing-source-{TestHelper.GetOsName()}";
+            var githubTargetOrg = $"e2e-testing-{TestHelper.GetOsName()}";
             var repo1 = "repo-1";
             var repo2 = "repo-2";
 
@@ -51,7 +51,7 @@ namespace OctoshiftCLI.IntegrationTests
             await _helper.CreateGithubRepo(githubSourceOrg, repo1);
             await _helper.CreateGithubRepo(githubSourceOrg, repo2);
 
-            await _helper.RunGeiCliMigration($"generate-script --github-source-org {githubSourceOrg} --github-target-org {githubTargetOrg} --archive-source-gh-repos --download-migration-logs");
+            await _helper.RunGeiCliMigration($"generate-script --github-source-org {githubSourceOrg} --github-target-org {githubTargetOrg} --archive-source-gh-repos --download-migration-logs", _tokens);
 
             await _helper.AssertGithubRepoExists(githubTargetOrg, repo1);
             await _helper.AssertGithubRepoExists(githubTargetOrg, repo2);
