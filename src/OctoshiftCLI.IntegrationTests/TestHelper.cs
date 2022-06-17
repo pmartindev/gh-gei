@@ -594,5 +594,14 @@ steps:
 
             File.Exists(migrationLogFile).Should().BeTrue();
         }
+
+        public async Task AssertGithubRepoIsArchived(string githubOrg, string repo)
+        {
+            _output.WriteLine("Checking that the repos in GitHub exist...");
+
+            var isRepoArchived = await _githubApi.IsRepoArchived(githubOrg, repo);
+
+            isRepoArchived.Should().BeTrue();
+        }
     }
 }
