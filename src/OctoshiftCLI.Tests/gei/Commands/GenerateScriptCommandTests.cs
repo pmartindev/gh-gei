@@ -62,7 +62,7 @@ namespace OctoshiftCLI.Tests.GithubEnterpriseImporter.Commands
             TestHelpers.VerifyCommandOption(_command.Options, "ghes-api-url", false);
             TestHelpers.VerifyCommandOption(_command.Options, "azure-storage-connection-string", false);
             TestHelpers.VerifyCommandOption(_command.Options, "no-ssl-verify", false);
-            TestHelpers.VerifyCommandOption(_command.Options, "skip-releases", false, true);
+            TestHelpers.VerifyCommandOption(_command.Options, "skip-releases", false);
             TestHelpers.VerifyCommandOption(_command.Options, "download-migration-logs", false);
             TestHelpers.VerifyCommandOption(_command.Options, "output", false);
             TestHelpers.VerifyCommandOption(_command.Options, "ssh", false, true);
@@ -384,6 +384,8 @@ namespace OctoshiftCLI.Tests.GithubEnterpriseImporter.Commands
 
             // Assert
             _script.Should().Be(expected);
+            _mockOctoLogger.Verify(m => m.LogInformation("AZURE STORAGE CONNECTION STRING: ***"));
+            _mockOctoLogger.Verify(m => m.LogInformation($"GHES API URL: {ghesApiUrl}"));
         }
 
         [Fact]
@@ -420,6 +422,7 @@ namespace OctoshiftCLI.Tests.GithubEnterpriseImporter.Commands
 
             // Assert
             _script.Should().Be(expected);
+            _mockOctoLogger.Verify(m => m.LogInformation("SSL verification disabled"));
         }
 
         [Fact]
@@ -829,9 +832,9 @@ if ($Failed -ne 0) {
 
             // Assert
             _script.Should().Be(expected.ToString());
+            _mockOctoLogger.Verify(m => m.LogInformation("AZURE STORAGE CONNECTION STRING: ***"));
+            _mockOctoLogger.Verify(m => m.LogInformation($"GHES API URL: {ghesApiUrl}"));
         }
-
-        // start of log download
 
         [Fact]
         public async Task Sequential_Ado_Single_Repo_With_Download_Migration_Logs()
@@ -1304,6 +1307,7 @@ if ($Failed -ne 0) {
 
             // Assert
             _script.Should().Be(expected.ToString());
+            _mockOctoLogger.Verify(m => m.LogInformation("SSL verification disabled"));
         }
 
         [Fact]
