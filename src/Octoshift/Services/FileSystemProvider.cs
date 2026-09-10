@@ -21,6 +21,22 @@ public class FileSystemProvider
 
     public virtual async Task WriteAllTextAsync(string path, string contents) => await File.WriteAllTextAsync(path, contents);
 
+    public virtual async Task WritePrivateTextAsync(string path, string contents)
+    {
+        var options = new FileStreamOptions { Mode = FileMode.Create, Access = FileAccess.Write };
+        if (!OperatingSystem.IsWindows())
+        {
+            options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+        }
+        await using var stream = new FileStream(path, options);
+        if (!OperatingSystem.IsWindows())
+        {
+            File.SetUnixFileMode(stream.SafeFileHandle, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+        }
+        await using var writer = new StreamWriter(stream);
+        await writer.WriteAsync(contents);
+    }
+
     public virtual async ValueTask WriteAsync(FileStream fileStream, ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
     {
         if (fileStream is null)

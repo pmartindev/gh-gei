@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Octoshift\Octoshift.csproj" />
+    <EmbeddedResource Include="Services/GitlabExportDiagnostics.rb" LogicalName="GitlabExportDiagnostics.rb" />
   </ItemGroup>
 
 </Project>

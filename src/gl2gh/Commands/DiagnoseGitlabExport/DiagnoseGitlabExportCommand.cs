@@ -3,6 +3,7 @@ using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using OctoshiftCLI.Commands;
 using OctoshiftCLI.GitlabToGithub.Factories;
+using OctoshiftCLI.GitlabToGithub.Services;
 using OctoshiftCLI.Services;
 
 namespace OctoshiftCLI.GitlabToGithub.Commands.DiagnoseGitlabExport;
@@ -11,7 +12,7 @@ public class DiagnoseGitlabExportCommand : CommandBase<DiagnoseGitlabExportComma
 {
     public DiagnoseGitlabExportCommand() : base(
         name: "diagnose-gitlab-export",
-        description: "Collects GitLab project export diagnostics and writes a report with GitLab admin log commands.")
+        description: "Collects GitLab project export diagnostics, optionally including server-side errors over administrator SSH.")
     {
         AddOption(GitlabServerUrl);
         AddOption(GitlabGroup);
@@ -21,6 +22,11 @@ public class DiagnoseGitlabExportCommand : CommandBase<DiagnoseGitlabExportComma
         AddOption(Overwrite);
         AddOption(NoSslVerify);
         AddOption(Verbose);
+        AddOption(SshHost);
+        AddOption(SshUser);
+        AddOption(SshKey);
+        AddOption(SshPort);
+        AddOption(GitlabContainer);
     }
 
     public Option<string> GitlabServerUrl { get; } = new(
@@ -53,6 +59,12 @@ public class DiagnoseGitlabExportCommand : CommandBase<DiagnoseGitlabExportComma
 
     public Option<bool> Verbose { get; } = new("--verbose");
 
+    public Option<string> SshHost { get; } = new("--ssh-host", "Optional GitLab OS administrator SSH host. Enables server-side diagnostics.");
+    public Option<string> SshUser { get; } = new("--ssh-user", "OS account with root or non-interactive sudo access, not a GitLab Git-over-SSH user.");
+    public Option<string> SshKey { get; } = new("--ssh-key", "Path to the administrator's private SSH key. Encrypted keys must be unlocked in ssh-agent.");
+    public Option<int> SshPort { get; } = new("--ssh-port", () => 22, "Administrator SSH port.");
+    public Option<string> GitlabContainer { get; } = new("--gitlab-container", "Optional Docker container name on the SSH host containing GitLab.");
+
     public override DiagnoseGitlabExportCommandHandler BuildHandler(DiagnoseGitlabExportCommandArgs args, IServiceProvider sp)
     {
         if (args is null)
@@ -70,6 +82,6 @@ public class DiagnoseGitlabExportCommand : CommandBase<DiagnoseGitlabExportComma
         var gitlabApi = gitlabApiFactory.Create(args.GitlabServerUrl, args.GitlabPat, args.NoSslVerify);
         var fileSystemProvider = sp.GetRequiredService<FileSystemProvider>();
 
-        return new DiagnoseGitlabExportCommandHandler(log, gitlabApi, fileSystemProvider);
+        return new DiagnoseGitlabExportCommandHandler(log, gitlabApi, fileSystemProvider, sp.GetRequiredService<GitlabSshDiagnosticsCollector>());
     }
 }

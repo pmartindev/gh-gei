@@ -3,6 +3,7 @@ using FluentAssertions;
 using Moq;
 using OctoshiftCLI.GitlabToGithub.Commands.DiagnoseGitlabExport;
 using OctoshiftCLI.GitlabToGithub.Factories;
+using OctoshiftCLI.GitlabToGithub.Services;
 using OctoshiftCLI.Services;
 using Xunit;
 
@@ -25,6 +26,7 @@ public class DiagnoseGitlabExportCommandTests
         _mockServiceProvider.Setup(m => m.GetService(typeof(OctoLogger))).Returns(_mockOctoLogger.Object);
         _mockServiceProvider.Setup(m => m.GetService(typeof(GitlabApiFactory))).Returns(_mockGitlabApiFactory.Object);
         _mockServiceProvider.Setup(m => m.GetService(typeof(FileSystemProvider))).Returns(_mockFileSystemProvider.Object);
+        _mockServiceProvider.Setup(m => m.GetService(typeof(GitlabSshDiagnosticsCollector))).Returns(new GitlabSshDiagnosticsCollector());
     }
 
     [Fact]
@@ -32,7 +34,7 @@ public class DiagnoseGitlabExportCommandTests
     {
         _command.Should().NotBeNull();
         _command.Name.Should().Be("diagnose-gitlab-export");
-        _command.Options.Count.Should().Be(8);
+        _command.Options.Count.Should().Be(13);
 
         TestHelpers.VerifyCommandOption(_command.Options, "gitlab-server-url", false);
         TestHelpers.VerifyCommandOption(_command.Options, "gitlab-group", false);
@@ -42,6 +44,11 @@ public class DiagnoseGitlabExportCommandTests
         TestHelpers.VerifyCommandOption(_command.Options, "overwrite", false);
         TestHelpers.VerifyCommandOption(_command.Options, "no-ssl-verify", false);
         TestHelpers.VerifyCommandOption(_command.Options, "verbose", false);
+        TestHelpers.VerifyCommandOption(_command.Options, "ssh-host", false);
+        TestHelpers.VerifyCommandOption(_command.Options, "ssh-user", false);
+        TestHelpers.VerifyCommandOption(_command.Options, "ssh-key", false);
+        TestHelpers.VerifyCommandOption(_command.Options, "ssh-port", false);
+        TestHelpers.VerifyCommandOption(_command.Options, "gitlab-container", false);
     }
 
     [Fact]

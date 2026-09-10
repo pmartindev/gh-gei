@@ -119,6 +119,41 @@ The `--gitlab-server-url` flag accepts both GitLab.com (`https://gitlab.com`) an
 
 5. The `migrate.ps1` script requires PowerShell to run. If not already installed see the [install instructions](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.2) to install PowerShell on Windows, Linux, or Mac. Then run the script.
 
+### GitLab export diagnostics
+
+GitLab-to-GitHub migration does not require an administrator SSH key. If an export fails before a GitHub migration ID is created, collect API-visible diagnostics with your `GITLAB_PAT`:
+
+```bash
+gh gl2gh diagnose-gitlab-export \
+  --gitlab-server-url https://gitlab.example.com \
+  --gitlab-group parent/group --gitlab-project project \
+  --output diagnostics.md
+```
+
+Use the same GitLab user that initiated the export: the export API status is user-specific. No GitHub PAT or migration ID is required for this command.
+
+For self-managed GitLab, optionally add administrator SSH access to collect actual export job/child job IDs, retained errors and matching server log entries:
+
+```bash
+gh gl2gh diagnose-gitlab-export \
+  --gitlab-server-url https://gitlab.example.com \
+  --gitlab-group parent/group --gitlab-project project \
+  --output diagnostics.md \
+  --ssh-host gitlab-admin.example.com --ssh-user admin \
+  --ssh-key /path/to/private-key --ssh-port 22
+```
+
+If GitLab runs in Docker on that SSH host, add `--gitlab-container gitlab`. Omit it if SSH already lands inside the GitLab container. SSH must reach the **OS administrator shell**, not GitLab's Git-over-SSH endpoint.
+
+- Install the OpenSSH client (`ssh`) on the machine running the CLI. Verify the server's host key through a trusted channel and add it to your OpenSSH `known_hosts` before running the command. Unknown or changed keys are rejected; host verification is never disabled.
+- Supply `--ssh-host`, `--ssh-user` and `--ssh-key` together. Encrypted keys must already be unlocked in `ssh-agent`; SSH password/passphrase prompts are disabled.
+- The account must be root or have non-interactive `sudo` access to `gitlab-rails` (or `docker exec` for container installations). Rails runner executes an administrator script and Docker access is effectively root access; use an appropriately authorized account.
+- Collection is read-only: it does not start/retry exports or change GitLab settings. It collects the latest 10 export jobs across users, up to 100 relations per job, and the last 8 MiB/100 matching entries of each current `exporter.log`, Sidekiq, `exceptions_json.log` and `api_json.log`. Strings and backtraces are abbreviated. Missing files, unavailable version-specific records and truncation appear as warnings in the report.
+- Collection targets Linux-package GitLab installations, directly or inside Docker, with a five-minute SSH limit. Rotated logs, other worker nodes and centralized/Kubernetes logging are not collected automatically; use the administrator follow-up instructions when the report is incomplete.
+- If SSH collection fails, the command exits with an error and preserves the API-only report. Use `--overwrite` to replace an existing report.
+
+**Treat reports and verbose CLI logs as sensitive.** Server messages can include customer data, internal paths and credentials. Collection limits which log fields are retained, but does not guarantee secret redaction. Reports are written with owner-only permissions on Linux/macOS; on Windows, secure the output directory with appropriate ACLs. Store all files securely and review/redact them before sharing. The private SSH key stays on the client; only its file path is passed to OpenSSH.
+
 ### Skipping version checks
 
 When the CLI is launched, it logs if a newer version of the CLI is available. You can skip this check by setting the `GEI_SKIP_VERSION_CHECK` environment variable to `true`. 

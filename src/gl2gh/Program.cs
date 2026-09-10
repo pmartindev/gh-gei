@@ -12,6 +12,7 @@ using OctoshiftCLI.Contracts;
 using OctoshiftCLI.Extensions;
 using OctoshiftCLI.Factories;
 using OctoshiftCLI.GitlabToGithub.Factories;
+using OctoshiftCLI.GitlabToGithub.Services;
 using OctoshiftCLI.Services;
 
 [assembly: InternalsVisibleTo("OctoshiftCLI.Tests")]
@@ -45,6 +46,7 @@ namespace OctoshiftCLI.GitlabToGithub
                 .AddSingleton<GitlabInspectorService>()
                 .AddSingleton<GitlabInspectorServiceFactory>()
                 .AddSingleton<FileSystemProvider>()
+                .AddSingleton<GitlabSshDiagnosticsCollector>()
                 .AddSingleton<DateTimeProvider>()
                 .AddSingleton<WarningsCountLogger>()
                 .AddSingleton<IVersionProvider, VersionChecker>(sp => sp.GetRequiredService<VersionChecker>())
