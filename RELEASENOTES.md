@@ -1,1 +1,1 @@
-
+- The `gl2gh migrate-repo` GitLab export failure error message now links to GitLab's export log documentation to help customers self-diagnose export failures.
