@@ -43,6 +43,8 @@ public class MigrateRepoCommandHandlerTests
     private const string GITHUB_ORG_ID = "github-org-id";
     private const string MIGRATION_SOURCE_ID = "migration-source-id";
     private const string MIGRATION_ID = "migration-id";
+    private const string MIGRATION_LOG_URL = "https://github.com/target-org/target-repo/migration_logs/migration-id.txt";
+    private const string TARGET_API_URL = "https://api.tenant.ghe.com";
 
     public MigrateRepoCommandHandlerTests()
     {
@@ -179,6 +181,60 @@ public class MigrateRepoCommandHandlerTests
             GITHUB_PAT,
             ARCHIVE_URL,
             null));
+    }
+
+    [Fact]
+    public async Task Migration_Log_Message_Does_Not_Include_Target_Api_Url_When_Not_Provided()
+    {
+        _mockEnvironmentVariableProvider.Setup(m => m.TargetGithubPersonalAccessToken(It.IsAny<bool>())).Returns(GITHUB_PAT);
+        _mockGithubApi.Setup(x => x.DoesRepoExist(GITHUB_ORG, GITHUB_REPO)).ReturnsAsync(false);
+        _mockGithubApi.Setup(x => x.GetOrganizationId(GITHUB_ORG)).ReturnsAsync(GITHUB_ORG_ID);
+        _mockGithubApi.Setup(x => x.CreateGitlabMigrationSource(GITHUB_ORG_ID)).ReturnsAsync(MIGRATION_SOURCE_ID);
+        _mockGithubApi.Setup(x => x.StartGitlabMigration(MIGRATION_SOURCE_ID, UNUSED_REPO_URL, GITHUB_ORG_ID, GITHUB_REPO, GITHUB_PAT, ARCHIVE_URL, null))
+            .ReturnsAsync(MIGRATION_ID);
+        _mockGithubApi.Setup(x => x.GetMigration(MIGRATION_ID))
+            .ReturnsAsync((State: RepositoryMigrationStatus.Succeeded, RepositoryName: GITHUB_REPO, WarningsCount: 0, FailureReason: null, MigrationLogUrl: MIGRATION_LOG_URL));
+
+        var args = new MigrateRepoCommandArgs
+        {
+            ArchiveUrl = ARCHIVE_URL,
+            GithubOrg = GITHUB_ORG,
+            GithubRepo = GITHUB_REPO,
+        };
+
+        await _handler.Handle(args);
+
+        _mockOctoLogger.Verify(m => m.LogInformation(It.Is<string>(s =>
+            s.Contains($"Migration log available at {MIGRATION_LOG_URL}") &&
+            s.Contains($"download-logs --github-org {GITHUB_ORG} --github-repo {GITHUB_REPO}`") &&
+            !s.Contains("--target-api-url"))));
+    }
+
+    [Fact]
+    public async Task Migration_Log_Message_Includes_Target_Api_Url_When_Provided()
+    {
+        _mockEnvironmentVariableProvider.Setup(m => m.TargetGithubPersonalAccessToken(It.IsAny<bool>())).Returns(GITHUB_PAT);
+        _mockGithubApi.Setup(x => x.DoesRepoExist(GITHUB_ORG, GITHUB_REPO)).ReturnsAsync(false);
+        _mockGithubApi.Setup(x => x.GetOrganizationId(GITHUB_ORG)).ReturnsAsync(GITHUB_ORG_ID);
+        _mockGithubApi.Setup(x => x.CreateGitlabMigrationSource(GITHUB_ORG_ID)).ReturnsAsync(MIGRATION_SOURCE_ID);
+        _mockGithubApi.Setup(x => x.StartGitlabMigration(MIGRATION_SOURCE_ID, UNUSED_REPO_URL, GITHUB_ORG_ID, GITHUB_REPO, GITHUB_PAT, ARCHIVE_URL, null))
+            .ReturnsAsync(MIGRATION_ID);
+        _mockGithubApi.Setup(x => x.GetMigration(MIGRATION_ID))
+            .ReturnsAsync((State: RepositoryMigrationStatus.Succeeded, RepositoryName: GITHUB_REPO, WarningsCount: 0, FailureReason: null, MigrationLogUrl: MIGRATION_LOG_URL));
+
+        var args = new MigrateRepoCommandArgs
+        {
+            ArchiveUrl = ARCHIVE_URL,
+            GithubOrg = GITHUB_ORG,
+            GithubRepo = GITHUB_REPO,
+            TargetApiUrl = TARGET_API_URL,
+        };
+
+        await _handler.Handle(args);
+
+        _mockOctoLogger.Verify(m => m.LogInformation(It.Is<string>(s =>
+            s.Contains($"Migration log available at {MIGRATION_LOG_URL}") &&
+            s.Contains($"download-logs --github-org {GITHUB_ORG} --github-repo {GITHUB_REPO} --target-api-url {TARGET_API_URL}`"))));
     }
 
     [Fact]
